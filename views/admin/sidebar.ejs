@@ -1,0 +1,55 @@
+<aside class="admin-sidebar">
+  <div class="admin-brand">
+    <div class="logo-icon" style="width: 2rem; height: 2rem; font-size: 1rem;">
+      <i class="fa-solid fa-shield-halved"></i>
+    </div>
+    <span>eKart</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+
+  <ul class="admin-nav">
+    <li class="admin-nav-item <%= activeTab === 'dashboard' ? 'active' : '' %>">
+      <a href="/admin">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li class="admin-nav-item <%= activeTab === 'products' ? 'active' : '' %>">
+      <a href="/admin/products">
+        <i class="fa-solid fa-box-archive"></i>
+        <span>Products</span>
+      </a>
+    </li>
+    <li class="admin-nav-item <%= activeTab === 'categories' ? 'active' : '' %>">
+      <a href="/admin/categories">
+        <i class="fa-solid fa-tags"></i>
+        <span>Categories</span>
+      </a>
+    </li>
+    <li class="admin-nav-item <%= activeTab === 'orders' ? 'active' : '' %>">
+      <a href="/admin/orders">
+        <i class="fa-solid fa-cart-flatbed"></i>
+        <span>Orders</span>
+      </a>
+    </li>
+    <li class="admin-nav-item <%= activeTab === 'users' ? 'active' : '' %>">
+      <a href="/admin/users">
+        <i class="fa-solid fa-users"></i>
+        <span>Users</span>
+      </a>
+    </li>
+
+    <li style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+      <a href="/" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #94a3b8; font-size: 0.875rem;">
+        <i class="fa-solid fa-store"></i>
+        <span>Live Storefront</span>
+      </a>
+    </li>
+    <li>
+      <a href="/logout" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #f87171; font-size: 0.875rem;">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span>Sign Out</span>
+      </a>
+    </li>
+  </ul>
+</aside>

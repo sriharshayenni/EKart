@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 3.5rem; padding-bottom: 5rem;">
+  <div style="max-width: 440px; margin: 0 auto;">
+    
+    <div class="card" style="padding: 2.25rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div class="brand-logo" style="justify-content: center; margin-bottom: 1rem;">
+          <div class="logo-icon">
+            <i class="fa-solid fa-bag-shopping"></i>
+          </div>
+          <span>e<span class="accent">Kart</span></span>
+        </div>
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">Welcome Back</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Sign in to access your orders, cart, and personalized wishlist
+        </p>
+      </div>
+
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="you@example.com" 
+            value="<%= typeof email !== 'undefined' ? email : '' %>"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+          </div>
+          <div class="input-group-password">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-control" 
+              placeholder="Enter your password" 
+              required
+              autocomplete="current-password"
+            >
+            <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.5rem;">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to eKart
+        </button>
+      </form>
+
+      <div style="margin-top: 1.75rem; text-align: center; font-size: 0.875rem; color: var(--text-muted); border-top: 1px solid var(--border-light); padding-top: 1.25rem;">
+        New to eKart? 
+        <a href="/register" style="color: var(--primary); font-weight: 600;">Create an account</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

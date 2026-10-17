@@ -1,0 +1,197 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container">
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-badge">⚡ Mega Festive Season Sale</span>
+      <h1 class="hero-title">Experience the Next Generation of <span class="glow">Shopping</span></h1>
+      <p class="hero-subtitle">
+        Discover over 10,000+ top-tier electronic flagships, curated designer fashion, and modern home essentials with lightning delivery.
+      </p>
+      <div class="hero-actions">
+        <a href="/products" class="btn btn-primary btn-lg">
+          <i class="fa-solid fa-bag-shopping"></i> Shop Collections
+        </a>
+        <a href="/products?sort=discount" class="btn btn-secondary btn-lg">
+          <i class="fa-solid fa-tags"></i> View Hot Deals
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Value Propositions / Trust Badges -->
+  <section class="features-strip">
+    <div class="feature-box">
+      <div class="feature-icon-wrap">
+        <i class="fa-solid fa-truck-fast"></i>
+      </div>
+      <div>
+        <h4 class="feature-title">Express Delivery</h4>
+        <p class="feature-desc">Guaranteed 24-48 hr fast dispatch</p>
+      </div>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrap">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div>
+        <h4 class="feature-title">100% Genuine</h4>
+        <p class="feature-desc">Direct from verified manufacturers</p>
+      </div>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrap">
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+      </div>
+      <div>
+        <h4 class="feature-title">7-Day Easy Returns</h4>
+        <p class="feature-desc">Hassle-free instant refunds</p>
+      </div>
+    </div>
+
+    <div class="feature-box">
+      <div class="feature-icon-wrap">
+        <i class="fa-solid fa-headset"></i>
+      </div>
+      <div>
+        <h4 class="feature-title">24/7 Dedicated Care</h4>
+        <p class="feature-desc">Always ready to assist your orders</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Categories -->
+  <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+    <section>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Shop by Category</h2>
+          <p class="section-subtitle">Browse through our handpicked top collections</p>
+        </div>
+        <a href="/products" class="view-all-link">Browse All <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="categories-grid">
+        <% categories.forEach(cat => { %>
+          <a href="/products?category=<%= cat.slug %>" class="category-card">
+            <div class="category-img-wrapper">
+              <img 
+                src="<%= cat.image || '/images/placeholder.svg' %>" 
+                alt="<%= cat.name %>" 
+                class="category-img"
+                onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+              >
+            </div>
+            <span class="category-name"><%= cat.name %></span>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Trending Products -->
+  <% if (typeof trendingProducts !== 'undefined' && trendingProducts.length > 0) { %>
+    <section>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Trending Right Now</h2>
+          <p class="section-subtitle">Top customer favorites and most-purchased items</p>
+        </div>
+        <a href="/products?sort=popular" class="view-all-link">View All Trending <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="products-grid">
+        <% trendingProducts.forEach(product => { %>
+          <%- include('../partials/product-card', { product: product }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Promotional Mini Banners -->
+  <section class="promo-grid">
+    <div class="promo-card banner-1">
+      <div>
+        <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+          Tech Bonanza
+        </span>
+        <h3 style="font-size: 1.5rem; font-weight: 800; margin-top: 0.75rem; margin-bottom: 0.5rem;">
+          Flagship Smartphones &amp; Audio
+        </h3>
+        <p style="font-size: 0.875rem; color: #e2e8f0; margin-bottom: 1.25rem;">
+          Up to 35% off on top electronics with instant bank discounts.
+        </p>
+      </div>
+      <div>
+        <a href="/products?category=smartphones-electronics" class="btn btn-secondary btn-sm" style="background: white; color: #1e3a8a; border: none; font-weight: 700;">
+          Explore Tech <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="promo-card banner-2">
+      <div>
+        <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+          Wardrobe Refresh
+        </span>
+        <h3 style="font-size: 1.5rem; font-weight: 800; margin-top: 0.75rem; margin-bottom: 0.5rem;">
+          New Season Fashion Drop
+        </h3>
+        <p style="font-size: 0.875rem; color: #e2e8f0; margin-bottom: 1.25rem;">
+          Elevate your daily style with contemporary silhouettes and comfort fits.
+        </p>
+      </div>
+      <div>
+        <a href="/products?category=fashion-clothing" class="btn btn-secondary btn-sm" style="background: white; color: #065f46; border: none; font-weight: 700;">
+          Shop Trends <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Arrivals -->
+  <% if (typeof newArrivals !== 'undefined' && newArrivals.length > 0) { %>
+    <section>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">New Arrivals</h2>
+          <p class="section-subtitle">The freshest additions to our store</p>
+        </div>
+        <a href="/products?sort=newest" class="view-all-link">See All New <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="products-grid">
+        <% newArrivals.forEach(product => { %>
+          <%- include('../partials/product-card', { product: product }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Best Deals / Discounts -->
+  <% if (typeof bestDeals !== 'undefined' && bestDeals.length > 0) { %>
+    <section style="margin-bottom: 3rem;">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Deals of the Day</h2>
+          <p class="section-subtitle">Huge savings on limited-time promo deals</p>
+        </div>
+        <a href="/products?sort=discount" class="view-all-link">All Offers <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="products-grid">
+        <% bestDeals.forEach(product => { %>
+          <%- include('../partials/product-card', { product: product }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

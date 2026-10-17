@@ -1,0 +1,37 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 4rem; padding-bottom: 6rem;">
+  <div style="max-width: 650px; margin: 0 auto; text-align: center;">
+    
+    <div style="font-size: 5.5rem; font-weight: 900; line-height: 1; color: var(--accent-rose); margin-bottom: 1rem;">
+      500
+    </div>
+
+    <h1 style="font-size: 2rem; font-weight: 800; color: var(--secondary); margin-bottom: 0.75rem;">
+      Internal Server Error
+    </h1>
+
+    <p style="font-size: 1.05rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+      <%= typeof errorMessage !== 'undefined' ? errorMessage : 'Something unexpected happened on our server. Our team has been notified and is looking into it.' %>
+    </p>
+
+    <% if (typeof errorStack !== 'undefined' && errorStack) { %>
+      <div style="text-align: left; background: #0f172a; color: #f87171; padding: 1.5rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.8125rem; overflow-x: auto; margin-bottom: 2rem;">
+        <pre><%= errorStack %></pre>
+      </div>
+    <% } %>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="/" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-house"></i> Go to Homepage
+      </a>
+      <a href="/contact" class="btn btn-outline btn-lg">
+        <i class="fa-solid fa-headset"></i> Contact Support
+      </a>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

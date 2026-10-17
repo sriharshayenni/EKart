@@ -1,0 +1,9 @@
+{
+  "files.associations": {
+    "*.ejs": "ejs"
+  },
+  "html.validate.enable": false,
+  "html.validate.styles": false,
+  "html.validate.scripts": false,
+  "html.format.enable": false
+}

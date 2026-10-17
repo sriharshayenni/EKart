@@ -1,0 +1,118 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Product Categories</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Organize storefront navigation and product grouping
+        </p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start;">
+      
+      <!-- Categories List -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">All Categories (<%= categories.length %>)</div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Slug</th>
+                <th>Products</th>
+                <th>Featured</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% categories.forEach(cat => { %>
+                <tr>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <img 
+                        src="<%= cat.image || '/images/placeholder.svg' %>" 
+                        alt="<%= cat.name %>" 
+                        class="admin-thumb"
+                        style="width: 2.25rem; height: 2.25rem; border-radius: 50%;"
+                        onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+                      >
+                      <div>
+                        <strong style="color: var(--secondary);"><%= cat.name %></strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);"><%= cat.description %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><code><%= cat.slug %></code></td>
+                  <td>
+                    <span style="font-weight: 700; color: var(--primary);">
+                      <%= countMap[cat._id.toString()] || 0 %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge <%= cat.isFeatured ? 'status-processing' : 'status-pending' %>">
+                      <%= cat.isFeatured ? 'Featured' : 'Standard' %>
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <form action="/admin/categories/<%= cat._id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this category? Only categories without active products can be removed.');">
+                      <button type="submit" class="btn btn-danger btn-sm" title="Delete Category">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add New Category Form -->
+      <div class="admin-card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.25rem;">
+          <i class="fa-solid fa-folder-plus" style="color: var(--primary);"></i> Add Category
+        </h3>
+
+        <form action="/admin/categories" method="POST">
+          <div class="form-group">
+            <label class="form-label" for="catName">Category Name *</label>
+            <input type="text" id="catName" name="name" class="form-control" placeholder="e.g. Gaming & VR" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="catDesc">Description</label>
+            <textarea id="catDesc" name="description" rows="3" class="form-control" placeholder="Brief description of this collection..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="catImg">Image URL / Path</label>
+            <input type="text" id="catImg" name="image" class="form-control" placeholder="/images/categories/gaming.jpg">
+          </div>
+
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+              <input type="checkbox" name="isFeatured" value="true">
+              Feature on Homepage grid
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-plus"></i> Create Category
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

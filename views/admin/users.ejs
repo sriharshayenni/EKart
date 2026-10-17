@@ -1,0 +1,124 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">User Accounts</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Customer records, registered accounts, and administrative access
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="admin-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+      <form action="/admin/users" method="GET" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 240px;">
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control" 
+            placeholder="Search users by name or email..." 
+            value="<%= query.search || '' %>"
+          >
+        </div>
+
+        <div style="min-width: 180px;">
+          <select name="role" class="form-control" onchange="this.form.submit()">
+            <option value="all">All Roles</option>
+            <option value="user" <%= query.role === 'user' ? 'selected' : '' %>>Standard Users</option>
+            <option value="admin" <%= query.role === 'admin' ? 'selected' : '' %>>Administrators</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-outline">Filter</button>
+        <% if (query.search || (query.role && query.role !== 'all')) { %>
+          <a href="/admin/users" class="btn btn-sm" style="color: var(--accent-rose);">Reset</a>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">User Directory (<%= totalUsers %> registered)</div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>Email Address</th>
+              <th>Phone</th>
+              <th>Joined Date</th>
+              <th>Role</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (users && users.length > 0) { %>
+              <% users.forEach(u => { %>
+                <tr>
+                  <td>
+                    <div style="font-weight: 700; color: var(--secondary);"><%= u.name %></div>
+                    <% if (currentUser && currentUser._id.toString() === u._id.toString()) { %>
+                      <span style="font-size: 0.7rem; background: #eff6ff; color: #1d4ed8; padding: 1px 6px; border-radius: 4px; font-weight: 700;">YOU</span>
+                    <% } %>
+                  </td>
+                  <td><%= u.email %></td>
+                  <td><%= u.phone || 'N/A' %></td>
+                  <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <span class="status-badge <%= u.role === 'admin' ? 'status-processing' : 'status-pending' %>">
+                      <%= u.role.toUpperCase() %>
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <% if (currentUser && currentUser._id.toString() !== u._id.toString()) { %>
+                      <form action="/admin/users/<%= u._id %>/role" method="POST" style="display: inline;" onsubmit="return confirm('Toggle administrative role for <%= u.name %>?');">
+                        <button type="submit" class="btn btn-outline btn-sm">
+                          <%= u.role === 'admin' ? 'Demote to User' : 'Promote to Admin' %>
+                        </button>
+                      </form>
+                    <% } else { %>
+                      <span style="font-size: 0.8125rem; color: var(--text-muted); font-style: italic;">Current Session</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                  No users found matching query.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div style="padding: 1.25rem; display: flex; justify-content: center;">
+          <div class="pagination" style="margin: 0;">
+            <% for(let p = 1; p <= totalPages; p++) { %>
+              <a 
+                href="/admin/users?<%= new URLSearchParams({...query, page: p}).toString() %>" 
+                class="page-link <%= p === currentPage ? 'active' : '' %>"
+              >
+                <%= p %>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

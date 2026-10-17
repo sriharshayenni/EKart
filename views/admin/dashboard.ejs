@@ -1,0 +1,176 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Executive Overview</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Real-time commerce metrics and inventory analytics
+        </p>
+      </div>
+
+      <div>
+        <a href="/admin/products/new" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Add New Product
+        </a>
+      </div>
+    </div>
+
+    <!-- Stat Metrics Grid -->
+    <div class="stats-grid">
+      <!-- Total Revenue -->
+      <div class="stat-card stat-blue">
+        <div>
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value">₹<%= stats.totalRevenue.toLocaleString() %></div>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+      </div>
+
+      <!-- Total Orders -->
+      <div class="stat-card stat-green">
+        <div>
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value"><%= stats.totalOrders.toLocaleString() %></div>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+      </div>
+
+      <!-- Total Products -->
+      <div class="stat-card stat-purple">
+        <div>
+          <div class="stat-label">Live Catalog</div>
+          <div class="stat-value"><%= stats.totalProducts.toLocaleString() %></div>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+      </div>
+
+      <!-- Total Users -->
+      <div class="stat-card stat-amber">
+        <div>
+          <div class="stat-label">Registered Users</div>
+          <div class="stat-value"><%= stats.totalUsers.toLocaleString() %></div>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid of Tables: Low Stock & Recent Orders -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+      
+      <!-- Low Stock Alerts -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--accent-amber); margin-right: 6px;"></i> Low Inventory Alerts
+          </div>
+          <a href="/admin/products" style="font-size: 0.8125rem; color: var(--primary); font-weight: 600;">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+                <% lowStockProducts.forEach(prod => { %>
+                  <tr>
+                    <td>
+                      <div style="font-weight: 600; color: var(--secondary); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <%= prod.name %>
+                      </div>
+                    </td>
+                    <td><%= prod.category ? prod.category.name : 'N/A' %></td>
+                    <td>
+                      <span class="status-badge status-cancelled" style="font-weight: 700;">
+                        <%= prod.stock %> units
+                      </span>
+                    </td>
+                    <td>
+                      <a href="/admin/products/<%= prod._id %>/edit" class="btn btn-outline btn-sm">Edit</a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    All items have healthy inventory levels!
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Orders Table -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 6px;"></i> Recent Orders
+          </div>
+          <a href="/admin/orders" style="font-size: 0.8125rem; color: var(--primary); font-weight: 600;">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentOrders && recentOrders.length > 0) { %>
+                <% recentOrders.forEach(ord => { %>
+                  <tr>
+                    <td>
+                      <a href="/admin/orders/<%= ord._id %>" style="font-weight: 700; color: var(--primary);">
+                        #<%= ord.orderNumber %>
+                      </a>
+                    </td>
+                    <td><%= ord.user ? ord.user.name : (ord.shippingAddress.fullName || 'Guest') %></td>
+                    <td style="font-weight: 700;">₹<%= ord.total.toLocaleString() %></td>
+                    <td>
+                      <span class="status-badge status-<%= ord.status.toLowerCase() %>">
+                        <%= ord.status %>
+                      </span>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    No orders placed yet.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

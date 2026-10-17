@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Customer Orders</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Track fulfillment status, process dispatches, and manage customer shipments
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="admin-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+      <form action="/admin/orders" method="GET" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 240px;">
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control" 
+            placeholder="Search by order number (e.g. EK-2026...)" 
+            value="<%= query.search || '' %>"
+          >
+        </div>
+
+        <div style="min-width: 180px;">
+          <select name="status" class="form-control" onchange="this.form.submit()">
+            <option value="all">All Statuses</option>
+            <option value="Pending" <%= query.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option value="Processing" <%= query.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+            <option value="Shipped" <%= query.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="Delivered" <%= query.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="Cancelled" <%= query.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-outline">Filter</button>
+        <% if (query.search || (query.status && query.status !== 'all')) { %>
+          <a href="/admin/orders" class="btn btn-sm" style="color: var(--accent-rose);">Clear</a>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">All Customer Orders (<%= totalOrders %> total)</div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order Number</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (orders && orders.length > 0) { %>
+              <% orders.forEach(ord => { %>
+                <tr>
+                  <td>
+                    <a href="/admin/orders/<%= ord._id %>" style="font-weight: 700; color: var(--primary);">
+                      #<%= ord.orderNumber %>
+                    </a>
+                  </td>
+                  <td>
+                    <div style="font-weight: 600; color: var(--secondary);">
+                      <%= ord.user ? ord.user.name : (ord.shippingAddress.fullName || 'Guest') %>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                      <%= ord.user ? ord.user.email : '' %>
+                    </div>
+                  </td>
+                  <td><%= new Date(ord.createdAt).toLocaleDateString() %></td>
+                  <td><%= ord.items.length %> items</td>
+                  <td style="font-weight: 700; color: var(--secondary);">
+                    ₹<%= ord.total.toLocaleString() %>
+                  </td>
+                  <td>
+                    <span style="font-size: 0.8125rem; font-weight: 600; text-transform: uppercase;">
+                      <%= ord.payment.method.replace('_', ' ') %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge status-<%= ord.status.toLowerCase() %>">
+                      <%= ord.status %>
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <a href="/admin/orders/<%= ord._id %>" class="btn btn-primary btn-sm">
+                      Manage <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                  No customer orders match the current filter.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div style="padding: 1.25rem; display: flex; justify-content: center;">
+          <div class="pagination" style="margin: 0;">
+            <% for(let p = 1; p <= totalPages; p++) { %>
+              <a 
+                href="/admin/orders?<%= new URLSearchParams({...query, page: p}).toString() %>" 
+                class="page-link <%= p === currentPage ? 'active' : '' %>"
+              >
+                <%= p %>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

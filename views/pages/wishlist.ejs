@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary);">My Saved Wishlist</h1>
+      <p style="font-size: 0.875rem; color: var(--text-muted);"><%= products.length %> items saved for later</p>
+    </div>
+    <a href="/products" class="btn btn-outline btn-sm">
+      <i class="fa-solid fa-bag-shopping"></i> Continue Browsing
+    </a>
+  </div>
+
+  <% if (products && products.length > 0) { %>
+    <div class="products-grid">
+      <% products.forEach(product => { %>
+        <div class="product-card">
+          <!-- Remove Wishlist Item -->
+          <form action="/wishlist/toggle" method="POST" style="position: absolute; top: 12px; right: 12px; z-index: 2;">
+            <input type="hidden" name="productId" value="<%= product._id %>">
+            <button 
+              type="submit" 
+              class="product-wishlist-btn" 
+              title="Remove from Wishlist"
+              style="color: var(--accent-rose);"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </form>
+
+          <!-- Product Image -->
+          <a href="/products/<%= product.slug %>" class="product-img-box">
+            <img 
+              src="<%= (product.images && product.images.length > 0) ? product.images[0] : '/images/placeholder.svg' %>" 
+              alt="<%= product.name %>" 
+              onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+            >
+          </a>
+
+          <!-- Details -->
+          <div class="product-info">
+            <h3 class="product-title">
+              <a href="/products/<%= product.slug %>"><%= product.name %></a>
+            </h3>
+
+            <div class="product-pricing">
+              <span class="current-price">₹<%= product.price.toLocaleString() %></span>
+              <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                <span class="original-price">₹<%= product.originalPrice.toLocaleString() %></span>
+              <% } %>
+            </div>
+
+            <!-- Action -->
+            <div class="card-actions">
+              <% if (product.stock > 0) { %>
+                <form action="/wishlist/move-to-cart" method="POST" style="width: 100%;">
+                  <input type="hidden" name="productId" value="<%= product._id %>">
+                  <button type="submit" class="btn-add-cart" style="width: 100%;">
+                    <i class="fa-solid fa-cart-arrow-down"></i> Move to Cart
+                  </button>
+                </form>
+              <% } else { %>
+                <button class="btn-add-cart" disabled style="width: 100%; background: var(--bg-muted); color: var(--text-muted); cursor: not-allowed;">
+                  Out of Stock
+                </button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fa-regular fa-heart"></i>
+      </div>
+      <h2 class="empty-title">Your wishlist is currently empty</h2>
+      <p class="empty-desc">
+        Tap the heart icon on any product to save your dream smartphones, fashion items, and tech gear here!
+      </p>
+      <a href="/products" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-bag-shopping"></i> Explore Products
+      </a>
+    </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

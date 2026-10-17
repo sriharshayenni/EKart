@@ -1,0 +1,183 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary);">Account Settings &amp; Profile</h1>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">Manage your personal information, shipping addresses, and security</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="/orders" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-box-archive"></i> My Orders
+      </a>
+      <a href="/logout" class="btn btn-danger btn-sm">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+      </a>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+    
+    <!-- Left Column: Personal Profile Form -->
+    <div class="card">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.25rem;">
+        <i class="fa-regular fa-user" style="color: var(--primary);"></i> Personal Profile
+      </h3>
+
+      <form action="/account/profile" method="POST">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="name" class="form-control" value="<%= user.name %>" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address (Immutable)</label>
+          <input type="email" class="form-control" value="<%= user.email %>" disabled style="background-color: var(--bg-muted); cursor: not-allowed;">
+          <span class="form-text">Contact customer care to change your primary account email.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-control" placeholder="+91 98765 43210" value="<%= user.phone || '' %>">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Account Role</label>
+          <div>
+            <span class="status-badge <%= user.role === 'admin' ? 'status-processing' : 'status-pending' %>" style="font-size: 0.85rem; padding: 4px 12px; text-transform: uppercase;">
+              <%= user.role %>
+            </span>
+            <% if (user.role === 'admin') { %>
+              <a href="/admin" style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-left: 0.75rem;">
+                Go to Admin Dashboard &rarr;
+              </a>
+            <% } %>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+          Save Profile Changes
+        </button>
+      </form>
+    </div>
+
+    <!-- Right Column: Saved Shipping Addresses -->
+    <div class="card">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.25rem;">
+        <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> Saved Shipping Addresses
+      </h3>
+
+      <!-- Existing Addresses List -->
+      <% if (user.addresses && user.addresses.length > 0) { %>
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2rem;">
+          <% user.addresses.forEach(addr => { %>
+            <div style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; display: flex; justify-content: space-between; align-items: flex-start; background: #f8fafc;">
+              <div style="font-size: 0.875rem; line-height: 1.5;">
+                <div style="font-weight: 700; color: var(--secondary); margin-bottom: 2px;">
+                  <%= addr.street %>
+                  <% if (addr.isDefault) { %>
+                    <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 600;">DEFAULT</span>
+                  <% } %>
+                </div>
+                <div style="color: var(--text-muted);"><%= addr.city %>, <%= addr.state %> - <%= addr.postalCode %></div>
+                <div style="color: var(--text-muted);"><%= addr.country %></div>
+              </div>
+
+              <form action="/account/address/<%= addr._id %>/delete" method="POST" onsubmit="return confirm('Delete this saved address?');">
+                <button type="submit" class="btn btn-sm" style="color: var(--accent-rose); background: none; border: none; cursor: pointer;">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </form>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          No saved addresses. Add a delivery address below for quicker checkouts.
+        </p>
+      <% } %>
+
+      <!-- Add New Address Form -->
+      <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.85rem; border-top: 1px solid var(--border-light); padding-top: 1rem;">
+        Add New Delivery Address
+      </h4>
+      <form action="/account/address" method="POST">
+        <div class="form-group">
+          <input type="text" name="street" class="form-control" placeholder="Street Address, House No." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <input type="text" name="city" class="form-control" placeholder="City" required>
+          </div>
+          <div class="form-group">
+            <input type="text" name="state" class="form-control" placeholder="State" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <input type="text" name="postalCode" class="form-control" placeholder="PIN Code" required>
+          </div>
+          <div class="form-group">
+            <input type="text" name="country" class="form-control" value="India" placeholder="Country" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; cursor: pointer;">
+            <input type="checkbox" name="isDefault" value="true">
+            Set as default delivery address
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-outline btn-sm">
+          <i class="fa-solid fa-plus"></i> Save Address
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Recent Orders Section -->
+  <% if (recentOrders && recentOrders.length > 0) { %>
+    <section class="card" style="margin-top: 2.5rem; padding: 1.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary);">Recent Order Activity</h3>
+        <a href="/orders" style="font-size: 0.875rem; color: var(--primary); font-weight: 600;">View All Orders &rarr;</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentOrders.forEach(ord => { %>
+              <tr>
+                <td style="font-weight: 700;">#<%= ord.orderNumber %></td>
+                <td><%= new Date(ord.createdAt).toLocaleDateString() %></td>
+                <td><%= ord.items.length %> items</td>
+                <td style="font-weight: 700; color: var(--primary);">₹<%= ord.total.toLocaleString() %></td>
+                <td><span class="status-badge status-<%= ord.status.toLowerCase() %>"><%= ord.status %></span></td>
+                <td><a href="/orders/<%= ord._id %>" class="btn btn-outline btn-sm">Details</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

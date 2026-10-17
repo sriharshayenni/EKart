@@ -1,0 +1,118 @@
+<!-- Top Announcement Bar -->
+<div class="announcement-bar">
+  <span>⚡ <strong>FESTIVE SPECIAL:</strong> Flat 40% OFF on Top Tech &amp; Fashion! Use code <span class="highlight">EKARTFIRST</span> | Free delivery over ₹1,000 ⚡</span>
+</div>
+
+<!-- Main Sticky Header -->
+<header class="main-header">
+  <div class="container navbar-container">
+    
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Brand Logo -->
+    <a href="/" class="brand-logo">
+      <div class="logo-icon">
+        <i class="fa-solid fa-bag-shopping"></i>
+      </div>
+      <span>e<span class="accent">Kart</span></span>
+    </a>
+
+    <!-- Live Search Bar -->
+    <div class="header-search">
+      <form action="/products" method="GET" class="search-form">
+        <input 
+          type="text" 
+          name="search" 
+          class="search-input" 
+          placeholder="Search products, brands, smartphones, laptops..." 
+          value="<%= typeof query !== 'undefined' && query.search ? query.search : '' %>"
+          required
+        >
+        <button type="submit" class="search-btn" aria-label="Submit search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Header Actions (Account, Wishlist, Cart) -->
+    <div class="header-actions">
+
+      <!-- Wishlist Action -->
+      <a href="/wishlist" class="action-item" title="My Wishlist">
+        <i class="fa-regular fa-heart" style="font-size: 1.25rem;"></i>
+        <span class="badge wishlist-badge" style="<%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? 'display: inline-block;' : 'display: none;' %>">
+          <%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %>
+        </span>
+      </a>
+
+      <!-- Shopping Cart Action -->
+      <a href="/cart" class="action-item" title="Shopping Cart">
+        <i class="fa-solid fa-cart-shopping" style="font-size: 1.25rem;"></i>
+        <span class="badge cart-badge" style="<%= (typeof cartCount !== 'undefined' && cartCount > 0) ? 'display: inline-block;' : 'display: none;' %>">
+          <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+        </span>
+      </a>
+
+      <!-- User Account Menu -->
+      <div class="account-menu">
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <button class="account-btn">
+            <i class="fa-regular fa-user"></i>
+            <span><%= currentUser.name.split(' ')[0] %></span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="/account"><i class="fa-regular fa-id-badge"></i> My Profile</a>
+            <a href="/orders"><i class="fa-solid fa-box-archive"></i> My Orders</a>
+            <a href="/wishlist"><i class="fa-regular fa-heart"></i> My Wishlist</a>
+            <% if (currentUser.role === 'admin') { %>
+              <div class="dropdown-divider"></div>
+              <a href="/admin" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-shield-halved"></i> Admin Console</a>
+            <% } %>
+            <div class="dropdown-divider"></div>
+            <a href="/logout" style="color: var(--accent-rose);"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</a>
+          </div>
+        <% } else { %>
+          <a href="/login" class="btn btn-sm btn-primary" style="border-radius: var(--radius-full); padding: 0.45rem 1.15rem;">
+            <i class="fa-regular fa-user"></i> Sign In
+          </a>
+        <% } %>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Category Navigation Bar -->
+  <div class="categories-bar">
+    <div class="container categories-nav">
+      <a href="/products" class="cat-link <%= typeof currentPath !== 'undefined' && currentPath === '/products' && (typeof query === 'undefined' || !query || !query.category) ? 'active' : '' %>">
+        <i class="fa-solid fa-border-all"></i> All Products
+      </a>
+      <a href="/products?category=smartphones-electronics" class="cat-link">
+        <i class="fa-solid fa-mobile-screen-button"></i> Smartphones &amp; Tech
+      </a>
+      <a href="/products?category=laptops-accessories" class="cat-link">
+        <i class="fa-solid fa-laptop"></i> Laptops &amp; PCs
+      </a>
+      <a href="/products?category=fashion-clothing" class="cat-link">
+        <i class="fa-solid fa-shirt"></i> Fashion
+      </a>
+      <a href="/products?category=shoes-lifestyle" class="cat-link">
+        <i class="fa-solid fa-shoe-prints"></i> Footwear
+      </a>
+      <a href="/products?category=home-appliances" class="cat-link">
+        <i class="fa-solid fa-blender"></i> Appliances
+      </a>
+      <a href="/products?category=beauty-personal-care" class="cat-link">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Beauty
+      </a>
+      <a href="/products?category=home-decor-essentials" class="cat-link">
+        <i class="fa-solid fa-couch"></i> Home &amp; Living
+      </a>
+    </div>
+  </div>
+</header>

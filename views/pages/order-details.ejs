@@ -1,0 +1,176 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <!-- Success Announcement if just placed -->
+  <% if (typeof isNewOrder !== 'undefined' && isNewOrder) { %>
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-lg); padding: 2rem; text-align: center; margin-bottom: 2.5rem; box-shadow: var(--shadow-sm);">
+      <div style="width: 3.5rem; height: 3.5rem; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1rem auto;">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: #065f46; margin-bottom: 0.5rem;">
+        Order Placed Successfully!
+      </h2>
+      <p style="color: #047857; font-size: 0.95rem; max-width: 520px; margin: 0 auto;">
+        Thank you for shopping with eKart! Your order <strong>#<%= order.orderNumber %></strong> has been logged and our fulfillment team is preparing your package.
+      </p>
+    </div>
+  <% } %>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.35rem;">
+        <a href="/orders" style="color: var(--primary);"><i class="fa-solid fa-arrow-left"></i> Back to Orders</a>
+      </div>
+      <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">
+        Order #<%= order.orderNumber %>
+      </h1>
+      <span style="font-size: 0.875rem; color: var(--text-muted);">
+        Placed on <%= new Date(order.createdAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+      </span>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <span class="status-badge status-<%= order.status.toLowerCase() %>" style="font-size: 0.95rem; padding: 6px 16px;">
+        <%= order.status %>
+      </span>
+      <% if (order.status === 'Pending') { %>
+        <form action="/orders/<%= order._id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? Any deducted inventory will be returned.');">
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="fa-solid fa-ban"></i> Cancel Order
+          </button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Status Progress Tracker -->
+  <% if (order.status !== 'Cancelled') { %>
+    <div class="card" style="margin-bottom: 2.5rem; padding: 2rem;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; position: relative;">
+        <% 
+          const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered'];
+          const currentIndex = statuses.indexOf(order.status);
+        %>
+        <% statuses.forEach((st, idx) => { %>
+          <% const isCompleted = idx <= currentIndex; %>
+          <div>
+            <div style="width: 2.75rem; height: 2.75rem; border-radius: 50%; background: <%= isCompleted ? 'var(--primary)' : 'var(--bg-muted)' %>; color: <%= isCompleted ? 'white' : 'var(--text-muted)' %>; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto; font-size: 1.1rem; box-shadow: <%= isCompleted ? '0 4px 10px rgba(37, 99, 235, 0.3)' : 'none' %>;">
+              <% if (idx === 0) { %><i class="fa-solid fa-receipt"></i><% } %>
+              <% if (idx === 1) { %><i class="fa-solid fa-box"></i><% } %>
+              <% if (idx === 2) { %><i class="fa-solid fa-truck-fast"></i><% } %>
+              <% if (idx === 3) { %><i class="fa-solid fa-house-chimney"></i><% } %>
+            </div>
+            <div style="font-size: 0.875rem; font-weight: 700; color: <%= isCompleted ? 'var(--secondary)' : 'var(--text-muted)' %>;">
+              <%= st %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="alert alert-error" style="margin-bottom: 2rem;">
+      <i class="fa-solid fa-triangle-exclamation"></i> This order was cancelled and is no longer being processed.
+    </div>
+  <% } %>
+
+  <!-- Order Details Layout Grid -->
+  <div style="display: grid; grid-template-columns: 1fr 360px; gap: 2rem; align-items: start;">
+    
+    <!-- Itemized List -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light); font-weight: 700; font-size: 1.1rem; color: var(--secondary);">
+        Ordered Items (<%= order.items.length %>)
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">Product</th>
+              <th>Price</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(item => { %>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img 
+                      src="<%= item.image || '/images/placeholder.svg' %>" 
+                      alt="<%= item.name %>" 
+                      class="admin-thumb"
+                      style="width: 3.25rem; height: 3.25rem;"
+                      onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+                    >
+                    <span style="font-weight: 600; color: var(--secondary);"><%= item.name %></span>
+                  </div>
+                </td>
+                <td style="font-weight: 600;">₹<%= item.price.toLocaleString() %></td>
+                <td style="text-align: center; font-weight: 600;"><%= item.quantity %></td>
+                <td style="text-align: right; font-weight: 700; color: var(--primary);">₹<%= item.subtotal.toLocaleString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Financial Summary -->
+      <div style="padding: 1.5rem; background: #f8fafc; border-top: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 0.65rem; max-width: 320px; margin-left: auto;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted);">
+          <span>Items Subtotal:</span>
+          <span style="font-weight: 600; color: var(--secondary);">₹<%= order.subtotal.toLocaleString() %></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted);">
+          <span>Shipping Fee:</span>
+          <span style="font-weight: 600; color: var(--secondary);"><%= order.shippingFee === 0 ? 'FREE' : `₹${order.shippingFee}` %></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted);">
+          <span>GST / Tax:</span>
+          <span style="font-weight: 600; color: var(--secondary);">₹<%= order.tax.toLocaleString() %></span>
+        </div>
+        <div style="border-top: 2px solid var(--border-light); padding-top: 0.75rem; display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--secondary);">
+          <span>Total Paid:</span>
+          <span style="color: var(--primary);">₹<%= order.total.toLocaleString() %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar Info (Shipping & Payment) -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Shipping Address Card -->
+      <div class="card">
+        <h4 style="font-size: 1rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> Delivery Address
+        </h4>
+        <div style="font-size: 0.9375rem; color: var(--text-main); line-height: 1.6;">
+          <strong><%= order.shippingAddress.fullName %></strong><br>
+          <%= order.shippingAddress.street %><br>
+          <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.postalCode %><br>
+          <%= order.shippingAddress.country %><br>
+          <span style="color: var(--text-muted); font-size: 0.8125rem;">Phone: <%= order.shippingAddress.phone %></span>
+        </div>
+      </div>
+
+      <!-- Payment Summary Card -->
+      <div class="card">
+        <h4 style="font-size: 1rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-credit-card" style="color: var(--primary);"></i> Payment Status
+        </h4>
+        <div style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;">
+          <div>Method: <strong style="color: var(--secondary); text-transform: uppercase;"><%= order.payment.method.replace('_', ' ') %></strong></div>
+          <div>Status: <span class="status-badge" style="background: #dcfce7; color: #166534; font-size: 0.75rem; padding: 2px 8px;"><%= order.payment.status %></span></div>
+          <div style="margin-top: 0.5rem; font-size: 0.75rem; word-break: break-all;">Ref: <%= order.payment.transactionId %></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

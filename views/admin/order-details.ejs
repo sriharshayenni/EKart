@@ -1,0 +1,174 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Order #<%= order.orderNumber %></h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Placed on <%= new Date(order.createdAt).toLocaleString() %>
+        </p>
+      </div>
+
+      <a href="/admin/orders" class="btn btn-outline">
+        <i class="fa-solid fa-arrow-left"></i> Back to Orders
+      </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 360px; gap: 2rem; align-items: start;">
+      
+      <!-- Left Column: Items & Tracking History -->
+      <div>
+        <!-- Items Table Card -->
+        <div class="admin-card" style="margin-bottom: 2rem;">
+          <div class="admin-card-header">
+            <div class="admin-card-title">Order Contents (<%= order.items.length %> items)</div>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th style="text-align: center;">Qty</th>
+                  <th style="text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% order.items.forEach(it => { %>
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <img 
+                          src="<%= it.image || '/images/placeholder.svg' %>" 
+                          alt="<%= it.name %>" 
+                          class="admin-thumb"
+                          onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+                        >
+                        <span style="font-weight: 600; color: var(--secondary);"><%= it.name %></span>
+                      </div>
+                    </td>
+                    <td>₹<%= it.price.toLocaleString() %></td>
+                    <td style="text-align: center;"><%= it.quantity %></td>
+                    <td style="text-align: right; font-weight: 700; color: var(--primary);">
+                      ₹<%= it.subtotal.toLocaleString() %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="padding: 1.25rem 1.5rem; background: #f8fafc; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end;">
+            <div style="width: 260px; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Subtotal:</span>
+                <span style="font-weight: 600;">₹<%= order.subtotal.toLocaleString() %></span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Shipping:</span>
+                <span style="font-weight: 600;"><%= order.shippingFee === 0 ? 'FREE' : `₹${order.shippingFee}` %></span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Tax / GST:</span>
+                <span style="font-weight: 600;">₹<%= order.tax.toLocaleString() %></span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; border-top: 1px solid var(--border-light); padding-top: 0.5rem; color: var(--primary);">
+                <span>Total:</span>
+                <span>₹<%= order.total.toLocaleString() %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tracking Notes & History -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">Order Timeline &amp; Status Logs</div>
+          </div>
+          <div style="padding: 1.5rem;">
+            <% if (order.trackingNotes && order.trackingNotes.length > 0) { %>
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <% order.trackingNotes.forEach(note => { %>
+                  <div style="display: flex; gap: 1rem; align-items: flex-start; border-left: 3px solid var(--primary); padding-left: 1rem;">
+                    <div>
+                      <span class="status-badge status-<%= note.status.toLowerCase() %>" style="font-size: 0.75rem;">
+                        <%= note.status %>
+                      </span>
+                      <p style="font-size: 0.875rem; color: var(--secondary); margin-top: 4px; font-weight: 500;">
+                        <%= note.message %>
+                      </p>
+                      <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        <%= new Date(note.timestamp).toLocaleString() %>
+                      </span>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <p style="color: var(--text-muted); font-size: 0.875rem;">No logs recorded yet.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Status Update & Customer Profile -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Status Updater Card -->
+        <div class="admin-card" style="padding: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">
+            Update Order Status
+          </h3>
+
+          <form action="/admin/orders/<%= order._id %>/status" method="POST">
+            <div class="form-group">
+              <label class="form-label" for="status">Fulfillment Status</label>
+              <select id="status" name="status" class="form-control" required>
+                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled (Restores Inventory)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="note">Status Note / Tracking ID</label>
+              <input type="text" id="note" name="note" class="form-control" placeholder="e.g. Dispatched via BlueDart AWB #9817293">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              Update Status
+            </button>
+          </form>
+        </div>
+
+        <!-- Customer & Shipping Card -->
+        <div class="admin-card" style="padding: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">
+            Customer &amp; Shipping
+          </h3>
+          <div style="font-size: 0.875rem; line-height: 1.6; color: var(--text-main);">
+            <strong><%= order.shippingAddress.fullName %></strong><br>
+            <%= order.shippingAddress.street %><br>
+            <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.postalCode %><br>
+            <%= order.shippingAddress.country %><br>
+            <div style="margin-top: 0.75rem; border-top: 1px solid var(--border-light); padding-top: 0.5rem; font-size: 0.8125rem; color: var(--text-muted);">
+              <div>Email: <%= order.user ? order.user.email : 'N/A' %></div>
+              <div>Phone: <%= order.shippingAddress.phone %></div>
+              <div>Payment: <span style="font-weight: 600; text-transform: uppercase;"><%= order.payment.method %></span> (<%= order.payment.status %>)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

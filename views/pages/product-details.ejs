@@ -1,0 +1,331 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 1.5rem; padding-bottom: 4rem;">
+
+  <!-- Breadcrumbs -->
+  <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+    <a href="/" style="color: var(--primary);">Home</a>
+    <span>/</span>
+    <a href="/products" style="color: var(--primary);">Products</a>
+    <span>/</span>
+    <% if (product.category) { %>
+      <a href="/products?category=<%= product.category.slug %>" style="color: var(--primary);"><%= product.category.name %></a>
+      <span>/</span>
+    <% } %>
+    <span style="color: var(--secondary); font-weight: 500;"><%= product.name %></span>
+  </div>
+
+  <!-- Product Details Layout Grid -->
+  <div class="product-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; margin-bottom: 4rem;">
+
+    <!-- Left Gallery Column -->
+    <div>
+      <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem; text-align: center; position: relative; margin-bottom: 1.25rem;">
+        
+        <!-- Stock Status Badge -->
+        <div style="position: absolute; top: 16px; left: 16px;">
+          <% if (product.stock > 10) { %>
+            <span class="status-badge" style="background: #ecfdf5; color: #065f46; font-size: 0.8rem; padding: 4px 10px;">
+              <i class="fa-solid fa-circle-check"></i> In Stock
+            </span>
+          <% } else if (product.stock > 0) { %>
+            <span class="status-badge" style="background: #fffbeb; color: #b45309; font-size: 0.8rem; padding: 4px 10px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Only <%= product.stock %> left in stock
+            </span>
+          <% } else { %>
+            <span class="status-badge" style="background: #fef2f2; color: #991b1b; font-size: 0.8rem; padding: 4px 10px;">
+              <i class="fa-solid fa-circle-xmark"></i> Out of Stock
+            </span>
+          <% } %>
+        </div>
+
+        <img 
+          id="main-product-img" 
+          src="<%= (product.images && product.images.length > 0) ? product.images[0] : '/images/placeholder.svg' %>" 
+          alt="<%= product.name %>" 
+          style="max-height: 420px; margin: 0 auto; object-fit: contain;"
+          onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+        >
+      </div>
+
+      <!-- Thumbnails Strip -->
+      <% if (product.images && product.images.length > 1) { %>
+        <div style="display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem;">
+          <% product.images.forEach((img, idx) => { %>
+            <div 
+              class="gallery-thumb <%= idx === 0 ? 'active' : '' %>" 
+              data-full-src="<%= img %>"
+              style="width: 72px; height: 72px; border: 2px solid <%= idx === 0 ? 'var(--primary)' : 'var(--border-light)' %>; border-radius: var(--radius-md); padding: 4px; cursor: pointer; background: white;"
+            >
+              <img 
+                src="<%= img %>" 
+                alt="thumbnail" 
+                style="width: 100%; height: 100%; object-fit: contain;"
+                onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+              >
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Right Information Column -->
+    <div>
+      <div style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.5rem;">
+        <%= product.brand || (product.category ? product.category.name : 'eKart Verified') %>
+      </div>
+
+      <h1 style="font-size: 2.15rem; font-weight: 800; color: var(--secondary); line-height: 1.25; margin-bottom: 1rem;">
+        <%= product.name %>
+      </h1>
+
+      <!-- Rating Bar -->
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <div style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+          <span><%= product.rating ? product.rating.average.toFixed(1) : '4.5' %></span>
+          <i class="fa-solid fa-star" style="font-size: 0.75rem;"></i>
+        </div>
+        <span style="color: var(--text-muted); font-size: 0.875rem;">
+          <%= product.rating ? product.rating.count : 0 %> verified customer reviews
+        </span>
+      </div>
+
+      <!-- Pricing Box -->
+      <div style="background: white; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
+        <div style="display: flex; align-items: baseline; gap: 1rem;">
+          <span style="font-size: 2.25rem; font-weight: 800; color: var(--secondary);">
+            ₹<%= product.price.toLocaleString() %>
+          </span>
+          <% if (product.originalPrice && product.originalPrice > product.price) { %>
+            <span style="font-size: 1.15rem; color: var(--text-subtle); text-decoration: line-through;">
+              ₹<%= product.originalPrice.toLocaleString() %>
+            </span>
+            <span class="badge-discount" style="font-size: 0.85rem; padding: 4px 10px;">
+              Save <%= product.discountPercentage %>%
+            </span>
+          <% } %>
+        </div>
+        <div style="font-size: 0.8125rem; color: var(--accent-emerald); font-weight: 600; margin-top: 0.4rem;">
+          Inclusive of all applicable taxes &amp; GST
+        </div>
+      </div>
+
+      <!-- Short Description -->
+      <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+        <%= product.shortDescription || product.description.substring(0, 180) + '...' %>
+      </p>
+
+      <!-- Purchase Controls -->
+      <% if (product.stock > 0) { %>
+        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+          <!-- Quantity Stepper -->
+          <div style="display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white; overflow: hidden; height: 3rem;">
+            <button type="button" id="btn-qty-minus" style="width: 2.5rem; height: 100%; border: none; background: none; cursor: pointer; color: var(--secondary); font-size: 1.1rem;">-</button>
+            <input 
+              type="number" 
+              id="product-quantity" 
+              value="1" 
+              min="1" 
+              max="<%= product.stock %>" 
+              style="width: 3rem; text-align: center; border: none; font-weight: 700; outline: none;"
+            >
+            <button type="button" id="btn-qty-plus" style="width: 2.5rem; height: 100%; border: none; background: none; cursor: pointer; color: var(--secondary); font-size: 1.1rem;">+</button>
+          </div>
+
+          <!-- Add to Cart -->
+          <button 
+            class="btn btn-primary btn-lg btn-add-cart-ajax" 
+            data-product-id="<%= product._id %>"
+            style="flex: 1; height: 3rem;"
+          >
+            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+          </button>
+
+          <!-- Add to Wishlist -->
+          <% 
+            let isItemWishlisted = false;
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.wishlist) {
+              isItemWishlisted = currentUser.wishlist.some(id => id.toString() === product._id.toString());
+            }
+          %>
+          <button 
+            class="btn btn-outline btn-lg btn-wishlist-toggle <%= isItemWishlisted ? 'active' : '' %>" 
+            data-product-id="<%= product._id %>"
+            title="Wishlist"
+            style="height: 3rem; padding: 0 1.25rem; <%= isItemWishlisted ? 'color: #ef4444; border-color: #ef4444;' : '' %>"
+          >
+            <i class="<%= isItemWishlisted ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
+          </button>
+        </div>
+      <% } else { %>
+        <div class="alert alert-warning" style="margin-bottom: 2rem;">
+          <i class="fa-solid fa-bell"></i> This product is currently sold out. Check back soon for restocks!
+        </div>
+      <% } %>
+
+      <!-- Trust Badges -->
+      <div style="border-top: 1px solid var(--border-light); padding-top: 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+        <div style="font-size: 0.8125rem; color: var(--text-muted);">
+          <i class="fa-solid fa-truck" style="color: var(--primary); font-size: 1.25rem; display: block; margin-bottom: 0.35rem;"></i>
+          Free Delivery Over ₹1,000
+        </div>
+        <div style="font-size: 0.8125rem; color: var(--text-muted);">
+          <i class="fa-solid fa-shield-halved" style="color: var(--primary); font-size: 1.25rem; display: block; margin-bottom: 0.35rem;"></i>
+          1-Year Warranty
+        </div>
+        <div style="font-size: 0.8125rem; color: var(--text-muted);">
+          <i class="fa-solid fa-arrow-rotate-left" style="color: var(--primary); font-size: 1.25rem; display: block; margin-bottom: 0.35rem;"></i>
+          7-Day Replacement
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Product Tabs Section (Overview, Specifications, Reviews) -->
+  <section class="card" style="margin-bottom: 4rem; padding: 2rem;">
+    <!-- Tab Controls -->
+    <div style="display: flex; gap: 1.5rem; border-bottom: 2px solid var(--border-light); margin-bottom: 2rem;">
+      <button 
+        class="tab-btn active" 
+        data-target="tab-desc" 
+        style="background: none; border: none; padding-bottom: 0.85rem; font-size: 1.05rem; font-weight: 700; color: var(--primary); border-bottom: 3px solid var(--primary); cursor: pointer;"
+      >
+        Product Description
+      </button>
+      <button 
+        class="tab-btn" 
+        data-target="tab-specs" 
+        style="background: none; border: none; padding-bottom: 0.85rem; font-size: 1.05rem; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; cursor: pointer;"
+      >
+        Technical Specifications
+      </button>
+      <button 
+        class="tab-btn" 
+        data-target="tab-reviews" 
+        style="background: none; border: none; padding-bottom: 0.85rem; font-size: 1.05rem; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; cursor: pointer;"
+      >
+        Reviews (<%= reviews ? reviews.length : 0 %>)
+      </button>
+    </div>
+
+    <!-- Tab 1: Description -->
+    <div id="tab-desc" class="tab-pane active" style="line-height: 1.8; color: var(--text-main);">
+      <p><%= product.description %></p>
+    </div>
+
+    <!-- Tab 2: Specifications -->
+    <div id="tab-specs" class="tab-pane" style="display: none;">
+      <% if (product.specifications && product.specifications.length > 0) { %>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9375rem;">
+          <tbody>
+            <% product.specifications.forEach((spec, idx) => { %>
+              <tr style="background: <%= idx % 2 === 0 ? '#f8fafc' : 'white' %>; border-bottom: 1px solid var(--border-light);">
+                <td style="padding: 0.85rem 1.25rem; font-weight: 600; width: 35%; color: var(--secondary);"><%= spec.key %></td>
+                <td style="padding: 0.85rem 1.25rem; color: var(--text-muted);"><%= spec.value %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p style="color: var(--text-muted);">Standard manufacturer specifications apply for this item.</p>
+      <% } %>
+    </div>
+
+    <!-- Tab 3: Reviews -->
+    <div id="tab-reviews" class="tab-pane" style="display: none;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+        
+        <!-- Reviews List -->
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--secondary);">Customer Feedback</h3>
+          <% if (reviews && reviews.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <% reviews.forEach(rev => { %>
+                <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 1.25rem;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                    <span style="font-weight: 700; color: var(--secondary);"><%= rev.user ? rev.user.name : 'Verified Customer' %></span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);"><%= new Date(rev.createdAt).toLocaleDateString() %></span>
+                  </div>
+                  <div style="color: var(--accent-amber); font-size: 0.85rem; margin-bottom: 0.5rem;">
+                    <% for(let s=1; s<=5; s++) { %>
+                      <i class="<%= s <= rev.rating ? 'fa-solid' : 'fa-regular' %> fa-star"></i>
+                    <% } %>
+                  </div>
+                  <% if (rev.title) { %>
+                    <h5 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem;"><%= rev.title %></h5>
+                  <% } %>
+                  <p style="font-size: 0.875rem; color: var(--text-muted);"><%= rev.comment %></p>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <p style="color: var(--text-muted);">No reviews yet. Be the first to share your thoughts on this product!</p>
+          <% } %>
+        </div>
+
+        <!-- Add Review Form -->
+        <div style="background: var(--bg-subtle); padding: 1.75rem; border-radius: var(--radius-md);">
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--secondary);">Write a Customer Review</h3>
+          <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+            <form action="/products/<%= product._id %>/review" method="POST">
+              <div class="form-group">
+                <label class="form-label">Rating</label>
+                <select name="rating" class="form-control" required>
+                  <option value="5">★★★★★ (5/5 Excellent)</option>
+                  <option value="4">★★★★☆ (4/5 Very Good)</option>
+                  <option value="3">★★★☆☆ (3/5 Average)</option>
+                  <option value="2">★★☆☆☆ (2/5 Below Average)</option>
+                  <option value="1">★☆☆☆☆ (1/5 Poor)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Headline / Title</label>
+                <input type="text" name="title" class="form-control" placeholder="e.g. Outstanding battery life and camera!">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Review Details</label>
+                <textarea name="comment" rows="4" class="form-control" placeholder="Share your personal experience with this product..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                Submit Customer Review
+              </button>
+            </form>
+          <% } else { %>
+            <p style="font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Please sign in to write an honest, verified purchase review.
+            </p>
+            <a href="/login" class="btn btn-primary">Sign In to Review</a>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Products Section -->
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section>
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Similar Products You Might Like</h2>
+          <p class="section-subtitle">Customers who viewed this item also explored</p>
+        </div>
+      </div>
+
+      <div class="products-grid">
+        <% relatedProducts.forEach(relProduct => { %>
+          <%- include('../partials/product-card', { product: relProduct }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,241 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-layout">
+  <%- include('sidebar') %>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">
+          <%= product ? `Edit Product: ${product.name}` : 'Create New Product' %>
+        </h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Fill in the specifications, inventory, and media assets for this item
+        </p>
+      </div>
+
+      <a href="/admin/products" class="btn btn-outline">
+        <i class="fa-solid fa-arrow-left"></i> Back to Products
+      </a>
+    </div>
+
+    <div class="admin-card" style="padding: 2rem;">
+      <form action="<%= product ? `/admin/products/${product._id}` : '/admin/products' %>" method="POST">
+        
+        <!-- Row 1: Name, Category, Brand -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="name">Product Title *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="form-control" 
+              value="<%= product ? product.name : '' %>" 
+              placeholder="e.g. Apple iPhone 15 Pro 256GB" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="category">Category *</label>
+            <select id="category" name="category" class="form-control" required>
+              <option value="">Select a Category</option>
+              <% categories.forEach(cat => { %>
+                <option 
+                  value="<%= cat._id %>" 
+                  <%= product && product.category && product.category.toString() === cat._id.toString() ? 'selected' : '' %>
+                >
+                  <%= cat.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="brand">Brand / Manufacturer</label>
+            <input 
+              type="text" 
+              id="brand" 
+              name="brand" 
+              class="form-control" 
+              value="<%= product ? product.brand : '' %>" 
+              placeholder="e.g. Apple, Nike, Samsung"
+            >
+          </div>
+        </div>
+
+        <!-- Row 2: Pricing & Inventory -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="price">Selling Price (₹) *</label>
+            <input 
+              type="number" 
+              id="price" 
+              name="price" 
+              class="form-control" 
+              value="<%= product ? product.price : '' %>" 
+              placeholder="e.g. 79999" 
+              min="0" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="originalPrice">Original / MRP Price (₹)</label>
+            <input 
+              type="number" 
+              id="originalPrice" 
+              name="originalPrice" 
+              class="form-control" 
+              value="<%= product ? product.originalPrice : '' %>" 
+              placeholder="e.g. 89999" 
+              min="0"
+            >
+            <span class="form-text">Used to calculate discount percentage badge</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="stock">Available Inventory Stock *</label>
+            <input 
+              type="number" 
+              id="stock" 
+              name="stock" 
+              class="form-control" 
+              value="<%= product ? product.stock : 10 %>" 
+              min="0" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Row 3: Image URLs -->
+        <div class="form-group">
+          <label class="form-label" for="images">Product Images (Enter 1 URL or file path per line)</label>
+          <textarea 
+            id="images" 
+            name="images" 
+            rows="3" 
+            class="form-control" 
+            placeholder="/images/products/phone.jpg&#10;https://images.unsplash.com/...&#10;/images/placeholder.svg"
+          ><%= product && product.images ? product.images.join('\n') : '' %></textarea>
+          <span class="form-text">First image will be the primary catalog thumbnail.</span>
+        </div>
+
+        <!-- Row 4: Descriptions -->
+        <div class="form-group">
+          <label class="form-label" for="shortDescription">Short Highlight Summary</label>
+          <input 
+            type="text" 
+            id="shortDescription" 
+            name="shortDescription" 
+            class="form-control" 
+            value="<%= product ? product.shortDescription : '' %>" 
+            placeholder="Key highlights in 1-2 punchy sentences"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Full Description *</label>
+          <textarea 
+            id="description" 
+            name="description" 
+            rows="5" 
+            class="form-control" 
+            placeholder="Comprehensive description of product features, build materials, and in-box items..." 
+            required
+          ><%= product ? product.description : '' %></textarea>
+        </div>
+
+        <!-- Row 5: Specifications Key/Value Rows -->
+        <div class="form-group" style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <label class="form-label" style="margin-bottom: 0;">Product Specifications</label>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-add-spec">
+              <i class="fa-solid fa-plus"></i> Add Spec Row
+            </button>
+          </div>
+
+          <div id="specs-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <% if (product && product.specifications && product.specifications.length > 0) { %>
+              <% product.specifications.forEach(spec => { %>
+                <div style="display: flex; gap: 0.75rem; align-items: center;" class="spec-row">
+                  <input type="text" name="specKeys" class="form-control" placeholder="Property (e.g. Display, RAM)" value="<%= spec.key %>">
+                  <input type="text" name="specValues" class="form-control" placeholder="Value (e.g. 6.7 inch OLED, 16GB)" value="<%= spec.value %>">
+                  <button type="button" class="btn btn-sm" style="color: var(--accent-rose);" onclick="this.parentElement.remove()">&times;</button>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div style="display: flex; gap: 0.75rem; align-items: center;" class="spec-row">
+                <input type="text" name="specKeys" class="form-control" placeholder="Property (e.g. Color)">
+                <input type="text" name="specValues" class="form-control" placeholder="Value (e.g. Midnight Black)">
+                <button type="button" class="btn btn-sm" style="color: var(--accent-rose);" onclick="this.parentElement.remove()">&times;</button>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Row 6: Tags & Feature Checkboxes -->
+        <div class="form-group">
+          <label class="form-label" for="tags">Search Tags (Comma-separated)</label>
+          <input 
+            type="text" 
+            id="tags" 
+            name="tags" 
+            class="form-control" 
+            value="<%= product && product.tags ? product.tags.join(', ') : '' %>" 
+            placeholder="smartphone, 5g, flagship, wireless charging"
+          >
+        </div>
+
+        <div style="display: flex; gap: 2rem; margin: 1.5rem 0; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; cursor: pointer;">
+            <input type="checkbox" name="active" <%= (!product || product.active) ? 'checked' : '' %>>
+            <strong>Active in Catalog</strong>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; cursor: pointer;">
+            <input type="checkbox" name="isFeatured" <%= product && product.isFeatured ? 'checked' : '' %>>
+            Featured Product
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; cursor: pointer;">
+            <input type="checkbox" name="isTrending" <%= product && product.isTrending ? 'checked' : '' %>>
+            Trending Product
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; cursor: pointer;">
+            <input type="checkbox" name="isNewArrival" <%= product && product.isNewArrival ? 'checked' : '' %>>
+            New Arrival
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-floppy-disk"></i> <%= product ? 'Save Changes' : 'Publish Product' %>
+          </button>
+          <a href="/admin/products" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+  document.getElementById('btn-add-spec')?.addEventListener('click', () => {
+    const container = document.getElementById('specs-container');
+    const row = document.createElement('div');
+    row.className = 'spec-row';
+    row.style = 'display: flex; gap: 0.75rem; align-items: center;';
+    row.innerHTML = `
+      <input type="text" name="specKeys" class="form-control" placeholder="Property (e.g. Warranty)">
+      <input type="text" name="specValues" class="form-control" placeholder="Value (e.g. 2 Years Onsite)">
+      <button type="button" class="btn btn-sm" style="color: var(--accent-rose);" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    container.appendChild(row);
+  });
+</script>
+
+<%- include('../partials/footer') %>

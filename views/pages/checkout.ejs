@@ -1,0 +1,257 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+
+  <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+    <a href="/cart" style="color: var(--primary);"><i class="fa-solid fa-arrow-left"></i> Return to Cart</a>
+    <span>/</span>
+    <span style="color: var(--secondary); font-weight: 500;">Secure Checkout</span>
+  </div>
+
+  <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--secondary); margin-bottom: 1.75rem;">
+    Complete Your Purchase
+  </h1>
+
+  <form action="/checkout" method="POST" id="checkout-form">
+    <div class="checkout-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start;">
+      
+      <!-- Left Column: Shipping & Payment Details -->
+      <div>
+        
+        <!-- Saved Addresses Quick-Select (if any) -->
+        <% if (addresses && addresses.length > 0) { %>
+          <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem;">
+              <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i> Choose a Saved Address
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+              <% addresses.forEach((addr, i) => { %>
+                <label style="border: 2px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: block; position: relative;" class="saved-addr-card">
+                  <input 
+                    type="radio" 
+                    name="selectedSavedAddress" 
+                    value="<%= i %>" 
+                    <%= addr.isDefault || i === 0 ? 'checked' : '' %>
+                    onchange="document.getElementById('street').value='<%= addr.street %>'; document.getElementById('city').value='<%= addr.city %>'; document.getElementById('state').value='<%= addr.state %>'; document.getElementById('postalCode').value='<%= addr.postalCode %>';"
+                  >
+                  <strong style="display: block; margin-top: 0.25rem;"><%= addr.street %></strong>
+                  <span style="font-size: 0.8125rem; color: var(--text-muted); display: block;">
+                    <%= addr.city %>, <%= addr.state %> - <%= addr.postalCode %>
+                  </span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Shipping Address Form Card -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.25rem;">
+            <i class="fa-solid fa-truck" style="color: var(--primary);"></i> Shipping Information
+          </h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="fullName">Full Recipient Name *</label>
+              <input 
+                type="text" 
+                id="fullName" 
+                name="fullName" 
+                class="form-control" 
+                value="<%= currentUser ? currentUser.name : '' %>" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="phone">Contact Phone Number *</label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone" 
+                class="form-control" 
+                placeholder="10-digit mobile number" 
+                value="<%= currentUser && currentUser.phone ? currentUser.phone : '' %>" 
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="street">Street Address / House No. / Landmark *</label>
+            <input 
+              type="text" 
+              id="street" 
+              name="street" 
+              class="form-control" 
+              placeholder="Apartment, suite, unit, building, floor, street"
+              value="<%= addresses && addresses.length > 0 ? addresses[0].street : '' %>" 
+              required
+            >
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="city">City / District *</label>
+              <input 
+                type="text" 
+                id="city" 
+                name="city" 
+                class="form-control" 
+                value="<%= addresses && addresses.length > 0 ? addresses[0].city : '' %>" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="state">State *</label>
+              <input 
+                type="text" 
+                id="state" 
+                name="state" 
+                class="form-control" 
+                value="<%= addresses && addresses.length > 0 ? addresses[0].state : '' %>" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="postalCode">PIN Code *</label>
+              <input 
+                type="text" 
+                id="postalCode" 
+                name="postalCode" 
+                class="form-control" 
+                value="<%= addresses && addresses.length > 0 ? addresses[0].postalCode : '' %>" 
+                required
+              >
+            </div>
+          </div>
+
+          <div style="margin-top: 0.5rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+              <input type="checkbox" name="saveAddress" value="true" checked>
+              Save this delivery address to my account for future orders
+            </label>
+          </div>
+        </div>
+
+        <!-- Payment Method Selector Card -->
+        <div class="card">
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">
+            <i class="fa-solid fa-credit-card" style="color: var(--primary);"></i> Payment Method
+          </h3>
+          <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            <em>(Development Mock Mode enabled: Simulated payments for local validation without real transaction charges)</em>
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Option 1: Mock Card -->
+            <label style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; background: white;">
+              <input type="radio" name="paymentMethod" value="mock_card" checked>
+              <div style="flex: 1;">
+                <strong style="display: block; color: var(--secondary);">Credit / Debit Card (Mock Sandbox)</strong>
+                <span style="font-size: 0.8125rem; color: var(--text-muted);">Simulated instant payment authorization</span>
+              </div>
+              <div style="font-size: 1.25rem; color: var(--text-muted);">
+                <i class="fa-brands fa-cc-visa"></i>
+                <i class="fa-brands fa-cc-mastercard"></i>
+              </div>
+            </label>
+
+            <!-- Option 2: Mock UPI -->
+            <label style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; background: white;">
+              <input type="radio" name="paymentMethod" value="mock_upi">
+              <div style="flex: 1;">
+                <strong style="display: block; color: var(--secondary);">Instant UPI / QR Code (Mock Sandbox)</strong>
+                <span style="font-size: 0.8125rem; color: var(--text-muted);">Google Pay, PhonePe, Paytm simulation</span>
+              </div>
+              <div style="font-size: 1.25rem; color: var(--text-muted);">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+            </label>
+
+            <!-- Option 3: COD -->
+            <label style="border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; background: white;">
+              <input type="radio" name="paymentMethod" value="cod">
+              <div style="flex: 1;">
+                <strong style="display: block; color: var(--secondary);">Cash on Delivery (COD)</strong>
+                <span style="font-size: 0.8125rem; color: var(--text-muted);">Pay in cash when package arrives at your doorstep</span>
+              </div>
+              <div style="font-size: 1.25rem; color: var(--text-muted);">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Itemized Order Summary -->
+      <aside class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.25rem;">
+          Order Review (<%= items.length %> items)
+        </h3>
+
+        <!-- Items preview list -->
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 260px; overflow-y: auto; margin-bottom: 1.25rem; padding-right: 4px;">
+          <% items.forEach(it => { %>
+            <div style="display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.65rem;">
+              <img 
+                src="<%= (it.product.images && it.product.images.length > 0) ? it.product.images[0] : '/images/placeholder.svg' %>" 
+                alt="<%= it.product.name %>" 
+                style="width: 2.5rem; height: 2.5rem; object-fit: contain; border-radius: var(--radius-sm); background: #f8fafc;"
+                onerror="this.onerror=null; this.src='/images/placeholder.svg';"
+              >
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--secondary);">
+                  <%= it.product.name %>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  Qty: <%= it.quantity %> &times; ₹<%= it.product.price.toLocaleString() %>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--secondary);">
+                ₹<%= (it.product.price * it.quantity).toLocaleString() %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Price breakdown -->
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+            <span>Items Subtotal</span>
+            <span style="font-weight: 600; color: var(--secondary);">₹<%= subtotal.toLocaleString() %></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+            <span>Shipping Charges</span>
+            <span style="font-weight: 600; color: var(--secondary);"><%= shippingFee === 0 ? 'FREE' : `₹${shippingFee}` %></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+            <span>Applicable GST (5%)</span>
+            <span style="font-weight: 600; color: var(--secondary);">₹<%= tax.toLocaleString() %></span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 1.25rem; font-weight: 800; color: var(--secondary); margin-bottom: 1.5rem;">
+          <span>Total Payable</span>
+          <span style="color: var(--primary);">₹<%= total.toLocaleString() %></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block" style="box-shadow: var(--shadow-lg);">
+          <i class="fa-solid fa-bag-shopping"></i> Place Order Now
+        </button>
+
+        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+          By placing your order, you agree to eKart's Terms of Sale and Privacy Policy.
+        </p>
+      </aside>
+
+    </div>
+  </form>
+
+</main>
+
+<%- include('../partials/footer') %>
